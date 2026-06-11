@@ -88,8 +88,11 @@ const isCoarsePointer = !!(window.matchMedia && matchMedia('(pointer: coarse)').
 const idleTimeout = () => isCoarsePointer ? CONFIG.idleTimeoutPhoneMs : CONFIG.idleTimeoutMs;
 
 function seek(frame) {
+  // skip if the video can't seek yet, or a previous seek is still in flight —
+  // hammering currentTime mid-seek makes a cold-loaded video thrash and never paint
+  if (video.readyState < 2 || video.seeking) return;
   const t = clamp(frame, 0, CONFIG.lastFrame) / CONFIG.fps;
-  if (video.readyState >= 2) video.currentTime = t + 0.0001;
+  video.currentTime = t + 0.0001;
 }
 
 function anchorPoint() {
