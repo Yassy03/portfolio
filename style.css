@@ -63,12 +63,19 @@ html, body {
   pointer-events: none;         /* cursor events belong to the stage */
 }
 
-/* Safari/iOS draw a big "start playback" button over inline video when
-   autoplay is blocked. We scrub frames, never play, so hide it. */
-.portrait video::-webkit-media-controls,
-.portrait video::-webkit-media-controls-start-playback-button {
+/* Safari/iOS draw a grey overlay + "start playback" button over inline video
+   when autoplay is blocked. We scrub frames, never play, so hide every part. */
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-overlay-enclosure,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-play-button {
   display: none !important;
-  -webkit-appearance: none;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* ==================================================================
