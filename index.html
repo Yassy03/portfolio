@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Interactive Portrait</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The stage holds the portrait. Move your cursor anywhere over it. -->
+  <main class="stage" id="stage">
+    <div class="portrait" id="portrait">
+      <video
+        id="video"
+        src="FinalLoop_web.mp4"
+        muted
+        autoplay
+        playsinline
+        preload="auto"
+        disablepictureinpicture
+      ></video>
+    </div>
+  </main>
+
+  <!-- Interactivity hint. Fades out the first time the user engages. -->
+  <p class="hint" id="hint">drag finger across screen</p>
+
+  <!-- Navigation: blue folders floating over the portrait. Positioned in CSS;
+       different spots on phone vs desktop. Each opens its glass overlay. -->
+  <nav class="nav" id="nav">
+    <button class="folder folder--about" type="button" data-modal="about">
+      <img class="folder__icon" src="folder.png" alt="" />
+      <span class="folder__label">About</span>
+    </button>
+    <button class="folder folder--portfolio" type="button" data-modal="portfolio">
+      <img class="folder__icon" src="folder.png" alt="" />
+      <span class="folder__label">Request portfolio</span>
+    </button>
+    <button class="folder folder--contact" type="button" data-modal="contact">
+      <img class="folder__icon" src="folder.png" alt="" />
+      <span class="folder__label">Contact</span>
+    </button>
+  </nav>
+
+  <!-- Frosted-glass overlays. One backdrop + one sheet; the inner content
+       blocks are swapped per folder. Hidden until a folder is clicked. -->
+  <div class="overlay" id="overlay" hidden>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <button class="sheet__close" id="sheetClose" type="button" aria-label="Close">×</button>
+
+      <!-- About -->
+      <section class="sheet__body" id="modal-about" hidden>
+        <h2 class="sheet__title">About</h2>
+        <div class="about-panel">
+          <p>born in 2003,</p>
+        </div>
+      </section>
+
+      <!-- Request portfolio -->
+      <section class="sheet__body" id="modal-portfolio" hidden>
+        <h2 class="sheet__title">Request<br />portfolio</h2>
+        <form class="reqform" id="reqform" novalidate>
+          <label class="reqfield"><span>Name :</span>
+            <input type="text" name="name" autocomplete="name" required />
+          </label>
+          <label class="reqfield"><span>Company :</span>
+            <input type="text" name="company" autocomplete="organization" />
+          </label>
+          <label class="reqfield reqfield--email"><span>email :</span>
+            <input type="email" name="email" autocomplete="email" required />
+          </label>
+          <button class="reqsubmit" type="submit">Submit request!</button>
+          <p class="reqform__status" id="reqStatus" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <!-- Contact -->
+      <section class="sheet__body" id="modal-contact" hidden>
+        <h2 class="sheet__title">Contact</h2>
+        <div class="links">
+          <a class="pill" href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
+          <a class="pill" href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="pill pill--email" href="mailto:yasavdji@gmail.com">yasavdji@gmail.com</a>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Calibration panel. Hidden until you press C. Everything here is live. -->
+  <aside class="panel" id="panel" hidden>
+    <div class="panel__head">
+      <span>Calibration</span>
+      <button class="panel__close" id="panelClose" aria-label="Close">×</button>
+    </div>
+
+    <div class="readout" id="readout">frame — · state —</div>
+
+    <p class="cal-help">Drag the slider to a head pose, then click the
+      direction it matches on the dial. The pink dot shows where the current
+      pose sits. <b>up</b> is required; the diagonals are optional.</p>
+
+    <div class="dial" id="dial">
+      <div class="dial__ring"></div>
+      <div class="dial__dot" id="dialDot" hidden></div>
+      <div class="dial__center"><span id="dialCenter">#0</span><small>frame</small></div>
+    </div>
+
+    <label class="field scrubfield">
+      <span>Scrub <em id="scrubVal">0</em></span>
+      <input type="range" id="scrub" min="0" max="243" step="1" value="0" />
+    </label>
+
+    <div class="seam">
+      <div class="seam__row">
+        <span>idle / front</span><b id="showIdle">#0</b>
+        <button data-set="idleFrame">set</button>
+      </div>
+      <div class="seam__row">
+        <span>loop end (back to up)</span><b id="showUpEnd">#223</b>
+        <button data-set="cardinals.upEnd">set</button>
+      </div>
+    </div>
+
+    <button class="ghost" id="resetOpt">Reset diagonals to auto</button>
+
+    <details class="adv">
+      <summary>Advanced</summary>
+      <div class="grid">
+        <label class="field"><span>anchorX</span><input type="number" step="0.01" data-cfg="anchorX" /></label>
+        <label class="field"><span>anchorY</span><input type="number" step="0.01" data-cfg="anchorY" /></label>
+        <label class="field"><span>smoothing</span><input type="number" step="0.01" data-cfg="smoothing" /></label>
+        <label class="field"><span>idleTimeout</span><input type="number" step="50" data-cfg="idleTimeoutMs" /></label>
+        <label class="field"><span>deadzone px</span><input type="number" step="5" data-cfg="deadzonePx" /></label>
+        <label class="field"><span>upAngle°</span><input type="number" step="5" data-cfg="upAngleDeg" /></label>
+        <label class="field"><span>direction ±1</span><input type="number" step="2" data-cfg="dirSign" /></label>
+        <label class="field"><span>lastFrame</span><input type="number" data-cfg="lastFrame" /></label>
+      </div>
+      <label class="field check">
+        <input type="checkbox" id="showAnchor" />
+        <span>Show anchor + cursor angle</span>
+      </label>
+    </details>
+
+    <button class="ghost" id="copyCfg">Copy config to clipboard</button>
+  </aside>
+
+  <!-- Debug overlay: anchor dot + line to cursor. Toggled from the panel. -->
+  <canvas class="debug" id="debug" hidden></canvas>
+
+  <script src="tracker.js"></script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+/* ------------------------------------------------------------------
+   Interactive Portrait — styles
+   Deliberately minimal for now. The portrait is the hero; everything
+   else stays quiet. We'll design the real landing page together.
+------------------------------------------------------------------ */
+
+:root {
+  --bg: #f3f1ee;        /* warm off-white, close to the footage backdrop */
+  --ink: #1a1a1a;
+  --muted: #8a8580;
+  --accent: #ff2e63;    /* picked from the top in the footage */
+  --panel-bg: #14110f;
+  --panel-ink: #f3f1ee;
+  --portrait-max: min(76vh, 620px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;                  /* no page scroll on mobile */
+  overscroll-behavior: none;         /* kill pull-to-refresh / bounce */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- Stage ---- */
+.stage {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;                /* finger drags track, don't scroll */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;       /* no iOS long-press image menu */
+}
+
+.portrait {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;               /* dodges mobile address-bar resize */
+  display: grid;
+  place-items: center;
+}
+
+/* The video is scrubbed by JS, never played.
+   object-fit: cover fills the whole screen (crops the edges, which are
+   just white). Switch to "contain" if any pose ever clips the head. */
+.portrait video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);          /* bump to ~1.4 to crop into the head */
+  transform-origin: 50% 38%;
+  user-select: none;
+  pointer-events: none;         /* cursor events belong to the stage */
+}
+
+/* ==================================================================
+   Interactivity hint
+   ================================================================== */
+.hint {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  z-index: 6;
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-shadow: 0 1px 6px #00000040;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity .6s ease;
+}
+.hint.is-hidden { opacity: 0; }
+
+/* ==================================================================
+   Folder navigation — blue folders floating over the portrait
+   ================================================================== */
+.nav {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;        /* folders re-enable it; gaps fall through to tracking */
+}
+
+.folder {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  color: var(--ink);
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s ease;
+}
+.folder:hover  { transform: scale(1.05); }
+.folder:active { transform: scale(0.97); }
+
+.folder__icon {
+  width: 96px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 6px 14px #0000001f);
+  pointer-events: none;
+}
+.folder__label {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* Phone placement (mockup): About top-left, Request portfolio mid-right,
+   Contact bottom-left. Percentages so they ride the portrait at any size. */
+.folder--about     { left: 4%;  top: 9%; }
+.folder--portfolio { right: 4%; top: 50%; }
+.folder--contact   { left: 4%;  top: 74%; }
+
+/* ==================================================================
+   Glass overlays — one frosted sheet, content swapped per folder
+   ================================================================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #ffffff14;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity .22s ease;
+}
+.overlay[hidden] { display: none; }
+.overlay.is-open { opacity: 1; }
+
+.sheet {
+  position: relative;
+  width: min(420px, 92vw);
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  padding: 30px 26px 34px;
+  border-radius: 34px;
+  border: 1.5px solid #ff7eb340;
+  /* frosted glass; the pink->blue gradient leaning warm at the foot */
+  background:
+    linear-gradient(180deg, #ffffff42 0%, #ffffff24 42%, #ff2e6330 100%),
+    #ffffff1a;
+  -webkit-backdrop-filter: blur(26px) saturate(135%);
+  backdrop-filter: blur(26px) saturate(135%);
+  box-shadow: 0 30px 80px #00000026;
+  transform: scale(0.96);
+  transition: transform .22s ease;
+}
+.overlay.is-open .sheet { transform: scale(1); }
+
+.sheet__close {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  color: #ffffffcc;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sheet__close:hover { color: #fff; }
+
+.sheet__body[hidden] { display: none; }
+
+.sheet__title {
+  margin: 6px 0 24px;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.05;
+  color: #ffffff;
+  text-shadow: 0 1px 12px #00000022;
+}
+
+/* ---- About ---- */
+.about-panel {
+  background: #ffffffb0;
+  border-radius: 22px;
+  padding: 22px 22px 200px;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.about-panel p { margin: 0; }
+
+/* ---- Request portfolio form ---- */
+.reqform {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.reqfield {
+  display: block;
+  background: #ffffffcc;
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+.reqfield--email { background: #ffe7eecc; }
+.reqfield > span {
+  display: block;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.reqfield input {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;        /* >=16px keeps iOS from zooming on focus */
+  color: var(--ink);
+  outline: none;
+}
+.reqsubmit {
+  margin-top: 8px;
+  padding: 16px;
+  border: 0;
+  border-radius: 22px;
+  background: #ffd9e2;
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  cursor: pointer;
+  transition: filter .12s ease, transform .08s ease;
+}
+.reqsubmit:hover  { filter: brightness(1.04); }
+.reqsubmit:active { transform: scale(0.99); }
+.reqsubmit:disabled { opacity: 0.6; cursor: default; }
+.reqform__status {
+  margin: 2px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: #fff;
+  min-height: 1em;
+}
+.reqform__status.is-error { color: #5a0014; }
+
+/* ---- Contact links ---- */
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+.pill {
+  display: block;
+  padding: 16px;
+  border-radius: 26px;
+  background: #ffffffcc;
+  color: var(--ink);
+  text-align: center;
+  text-decoration: none;
+  font-size: 17px;
+  transition: filter .12s ease, transform .08s ease;
+}
+.pill:hover  { filter: brightness(1.04); }
+.pill:active { transform: scale(0.99); }
+.pill--email { background: #ffe7eecc; }
+
+/* ==================================================================
+   Desktop — same elements, different spacing (only divergence point)
+   ================================================================== */
+@media (min-width: 760px) {
+  /* show the whole figure centered with white margins, not zoom-cropped */
+  .portrait video { object-fit: contain; }
+
+  /* folders spread to the sides */
+  .folder__icon { width: 84px; }
+  .folder--about     { left: 26%; top: 18%; }
+  .folder--contact   { left: 14%; top: 70%; }
+  .folder--portfolio { right: 12%; top: 46%; }
+}
+
+/* ---- Calibration panel ---- */
+.panel {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  width: 320px;
+  max-height: calc(100vh - 28px);
+  overflow: auto;
+  background: var(--panel-bg);
+  color: var(--panel-ink);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 12px;
+  z-index: 10;
+  box-shadow: 0 18px 50px #0000004d;
+}
+.panel[hidden] { display: none; }
+
+.panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+.panel__close {
+  background: none;
+  border: none;
+  color: var(--panel-ink);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.panel__close:hover { opacity: 1; }
+
+.readout {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  background: #ffffff14;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  color: #ffd2dd;
+}
+
+.panel .grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.panel .field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.panel .field > span {
+  color: #b9b2ac;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+}
+.panel .field em { color: #ffd2dd; font-style: normal; }
+
+.panel input[type="number"],
+.panel input[type="range"] {
+  width: 100%;
+  background: #ffffff10;
+  border: 1px solid #ffffff1f;
+  color: var(--panel-ink);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-family: inherit;
+}
+.panel input[type="range"] { padding: 6px 0; }
+
+.panel .field.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.panel .field.check span { color: #b9b2ac; }
+
+.panel .setlabel {
+  margin: 10px 0 4px;
+  color: #b9b2ac;
+  font-size: 11px;
+}
+
+.panel .setrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0;
+}
+.panel .setrow button {
+  flex: 1 1 auto;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.panel .setrow button:hover { filter: brightness(1.08); }
+
+/* ---- Calibration: help text ---- */
+.cal-help {
+  margin: 0 0 12px;
+  color: #b9b2ac;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.cal-help b { color: #ffd2dd; font-weight: 600; }
+
+/* ---- Calibration: the dial ---- */
+.dial {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 4px auto 12px;
+}
+.dial__ring {
+  position: absolute;
+  inset: 16px;
+  border: 1px dashed #ffffff2e;
+  border-radius: 50%;
+}
+.dial__node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  background: #ffffff14;
+  border: 1px solid #ffffff2b;
+  color: #ccc6c0;
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 9px;
+  line-height: 1.1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s, border-color .12s, transform .08s;
+}
+.dial__node:hover { background: #ffffff24; transform: translate(-50%, -50%) scale(1.06); }
+.dial__node:active { transform: translate(-50%, -50%) scale(0.96); }
+.dial__lbl { font-weight: 600; letter-spacing: 0.02em; }
+.dial__frame { color: #8c857f; font-family: ui-monospace, Menlo, monospace; }
+.dial__node.is-set { border-color: var(--accent); }
+.dial__node.is-set .dial__frame { color: #ffd2dd; }
+.dial__node.is-required { background: #ff2e6322; border-color: var(--accent); }
+
+.dial__dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px #ff2e6333;
+  pointer-events: none;
+  transition: left .04s linear, top .04s linear;
+}
+.dial__center {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+.dial__center span {
+  display: block;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 15px;
+  color: #ffd2dd;
+}
+.dial__center small { color: #8c857f; font-size: 9px; letter-spacing: 0.1em; }
+
+.scrubfield { margin-bottom: 12px; }
+
+/* ---- Calibration: seam rows ---- */
+.seam {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.seam__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #b9b2ac;
+}
+.seam__row span { flex: 1; }
+.seam__row b {
+  font-family: ui-monospace, Menlo, monospace;
+  color: #ffd2dd;
+  font-weight: 500;
+}
+.seam__row button,
+.ghost {
+  background: #ffffff14;
+  border: 1px solid #ffffff2b;
+  color: var(--panel-ink);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.seam__row button:hover, .ghost:hover { background: #ffffff24; }
+.ghost { display: block; width: 100%; margin: 6px 0; }
+
+/* ---- Calibration: advanced ---- */
+.adv { margin: 8px 0; }
+.adv summary {
+  cursor: pointer;
+  color: #b9b2ac;
+  font-size: 11px;
+  padding: 4px 0;
+  user-select: none;
+}
+
+/* ---- Debug overlay ---- */
+.debug {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+.debug[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The tracking itself is the point, so we keep it, but we don't
+     add any extra ambient motion elsewhere. */
+}
