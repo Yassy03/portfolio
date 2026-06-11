@@ -5,7 +5,7 @@
 ------------------------------------------------------------------ */
 
 :root {
-  --bg: #f3f1ee;        /* warm off-white, close to the footage backdrop */
+  --bg: #ffffff;        /* white (footage backdrop is white; video fills the screen) */
   --ink: #1a1a1a;
   --muted: #8a8580;
   --accent: #ff2e63;    /* picked from the top in the footage */
@@ -30,11 +30,10 @@ html, body {
 
 /* ---- Stage ---- */
 .stage {
-  position: relative;
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
+  position: fixed;
+  inset: 0;                          /* fill the viewport, no gaps */
   overflow: hidden;
+  background: var(--bg);
   cursor: crosshair;
   touch-action: none;                /* finger drags track, don't scroll */
   -webkit-user-select: none;
@@ -43,11 +42,10 @@ html, body {
 }
 
 .portrait {
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;               /* dodges mobile address-bar resize */
-  display: grid;
-  place-items: center;
+  position: absolute;
+  inset: 0;                          /* fill the stage completely */
+  width: 100%;
+  height: 100%;
 }
 
 /* The video is scrubbed by JS, never played.
@@ -305,9 +303,6 @@ video::-webkit-media-controls-play-button {
    Desktop — same elements, different spacing (only divergence point)
    ================================================================== */
 @media (min-width: 760px) {
-  /* show the whole figure centered with white margins, not zoom-cropped */
-  .portrait video { object-fit: contain; }
-
   /* folders spread to the sides */
   .folder__icon { width: 84px; }
   .folder--about     { left: 26%; top: 18%; }
