@@ -212,15 +212,21 @@ function tick(now) {
 
 // ---- input (mouse + touch + pen, unified via Pointer Events) ----
 let primed = false;
-function primeVideo() {          // iOS won't render a seeked frame until the
-  if (primed) return;            // video is "woken" by a real user gesture
-  primed = true;
-  try {
-    const p = video.play();
-    if (p && p.then) p.then(() => video.pause()).catch(() => {});
-    else video.pause();
+function primeVideo() {          // a paused video won't render a seeked frame until
+  if (primed) return;            // it's "woken" by playback once. Autoplay covers most
+  try {                          // browsers; incognito/Safari block it, so we retry on
+    const p = video.play();      // every interaction until a real gesture is accepted.
+    if (p && p.then) {
+      // only mark primed once play actually succeeds, so a blocked attempt retries
+      p.then(() => { primed = true; video.pause(); }).catch(() => {});
+    } else {
+      primed = true; video.pause();
+    }
   } catch (_) {}
 }
+// a genuine tap/click anywhere is always allowed to wake media — even in incognito
+['pointerdown', 'touchstart'].forEach((ev) =>
+  window.addEventListener(ev, primeVideo, { capture: true, passive: true }));
 
 // fade the "drag finger" hint away the first time the user does anything
 let hintDismissed = false;
@@ -232,6 +238,7 @@ function dismissHint() {
 
 function engage(e) {
   if (!e.isPrimary) return;      // ignore secondary fingers on multi-touch
+  primeVideo();                  // wake on first move too (works where muted play is allowed)
   dismissHint();
   mouse.x = e.clientX; mouse.y = e.clientY; mouse.inside = true;
   lastMove = performance.now();
