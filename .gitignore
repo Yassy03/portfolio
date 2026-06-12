@@ -11,3 +11,10 @@ head-tracker.zip
 # QR code assets — for printing/sharing, not part of the website
 qr-yasavdji.png
 qr-yasavdji.svg
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
