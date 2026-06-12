@@ -7,3 +7,7 @@ Thumbs.db
 
 # Local archive — not part of the deployed site
 head-tracker.zip
+
+# QR code assets — for printing/sharing, not part of the website
+qr-yasavdji.png
+qr-yasavdji.svg

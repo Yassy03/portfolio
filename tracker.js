@@ -396,9 +396,9 @@ window.addEventListener('keydown', (e) => {
 /* ==================================================================
    Folder navigation + glass overlays
    ================================================================== */
-// Paste your Formspree endpoint here, e.g. "https://formspree.io/f/abcdwxyz".
-// Until then, the portfolio form falls back to opening a pre-filled email.
-const FORM_ENDPOINT = '';
+// Formspree endpoint — submissions are emailed to the account owner.
+// If blanked, the form falls back to opening a pre-filled email instead.
+const FORM_ENDPOINT = 'https://formspree.io/f/mwvjreyd';
 
 const overlay    = document.getElementById('overlay');
 const sheetEl     = document.getElementById('sheet');
@@ -409,16 +409,13 @@ function openModal(id) {
   frozen = true;                      // freeze the pose so typing can't glitch the video
   hoveringFolder = false;
   sheetBodies.forEach((b) => { b.hidden = b.id !== 'modal-' + id; });
-  overlay.hidden = false;
-  requestAnimationFrame(() => overlay.classList.add('is-open'));
+  overlay.hidden = false;             // appear instantly at full blur (no fade)
   const focusable = overlay.querySelector('.sheet__body:not([hidden]) input, .sheet__body:not([hidden]) a');
   focusable?.focus({ preventScroll: true });
 }
 
 function closeModal() {
-  overlay.classList.remove('is-open');
-  const done = () => { overlay.hidden = true; overlay.removeEventListener('transitionend', done); };
-  overlay.addEventListener('transitionend', done);
+  overlay.hidden = true;              // dismiss instantly
   // resume from exactly where the head paused, then let it follow the cursor
   // naturally on the next move (no scrub-back-to-idle animation to glitch)
   frozen = false;

@@ -4,9 +4,24 @@
    else stays quiet. We'll design the real landing page together.
 ------------------------------------------------------------------ */
 
+@font-face {
+  font-family: "Nimbus Sans";
+  src: url("Fonts/NimbusSanL-Bol-webfont.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Albert Sans";
+  src: url("Fonts/AlbertSans-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;          /* variable font — full weight range */
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #ffffff;        /* white (footage backdrop is white; video fills the screen) */
-  --ink: #1a1a1a;
+  --ink: #5A5A5A;       /* softer grey body text */
   --muted: #8a8580;
   --accent: #ff2e63;    /* picked from the top in the footage */
   --panel-bg: #14110f;
@@ -21,7 +36,8 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--ink);
-  font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Inter", Helvetica, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;             /* Inter Medium */
   -webkit-font-smoothing: antialiased;
   overflow: hidden;                  /* no page scroll on mobile */
   overscroll-behavior: none;         /* kill pull-to-refresh / bounce */
@@ -34,7 +50,7 @@ html, body {
   inset: 0;                          /* fill the viewport, no gaps */
   overflow: hidden;
   background: var(--bg);
-  cursor: crosshair;
+  cursor: default;                   /* standard arrow, not a crosshair */
   touch-action: none;                /* finger drags track, don't scroll */
   -webkit-user-select: none;
   user-select: none;
@@ -97,6 +113,11 @@ video::-webkit-media-controls-play-button {
 }
 .hint.is-hidden { opacity: 0; }
 
+/* the "drag finger" prompt is touch-only — hide it on mouse/desktop */
+@media (hover: hover) and (pointer: fine) {
+  .hint { display: none; }
+}
+
 /* ==================================================================
    Folder navigation — blue folders floating over the portrait
    ================================================================== */
@@ -134,8 +155,9 @@ video::-webkit-media-controls-play-button {
   pointer-events: none;
 }
 .folder__label {
+  font-family: "Inter", Helvetica, "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.01em;
 }
 
@@ -154,36 +176,35 @@ video::-webkit-media-controls-play-button {
   z-index: 20;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 16px;
   background: #ffffff14;
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
-  opacity: 0;
-  transition: opacity .22s ease;
+  /* NOTE: no backdrop-filter here — it would cap the card's own blur below.
+     No opacity fade either — fading a backdrop-filter element ramps the blur
+     from 0 to full and shows a "ghost" of the sharp video. Appear instantly. */
 }
 .overlay[hidden] { display: none; }
-.overlay.is-open { opacity: 1; }
 
 .sheet {
   position: relative;
-  width: min(420px, 92vw);
-  max-height: calc(100vh - 48px);
-  max-height: calc(100dvh - 48px);
-  overflow: auto;
+  /* fits exactly inside the overlay's 16px padding, so it centers precisely */
+  width: min(420px, calc(100vw - 32px));
+  /* fixed size so every popup is the same card, regardless of its content */
+  height: min(680px, calc(100dvh - 32px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 30px 26px 34px;
   border-radius: 34px;
-  border: 1.5px solid #ff7eb340;
-  /* frosted glass; the pink->blue gradient leaning warm at the foot */
-  background:
-    linear-gradient(180deg, #ffffff42 0%, #ffffff24 42%, #ff2e6330 100%),
-    #ffffff1a;
-  -webkit-backdrop-filter: blur(26px) saturate(135%);
-  backdrop-filter: blur(26px) saturate(135%);
+     /* last value = opacity (0–1) */
+  /* neutral frosted glass; last value = opacity (0–1) */
+  background: rgba(186, 184, 184, 0.2);
+  -webkit-backdrop-filter: blur(54px) saturate(125%);
+  backdrop-filter: blur(54px) saturate(125%);
   box-shadow: 0 30px 80px #00000026;
-  transform: scale(0.96);
-  transition: transform .22s ease;
+  /* no transform/scale animation here — moving a heavy backdrop-filter element
+     forces the blur to recompute every frame and makes the transition janky.
+     The overlay's opacity fade carries the open/close instead. */
 }
-.overlay.is-open .sheet { transform: scale(1); }
 
 .sheet__close {
   position: absolute;
@@ -202,23 +223,33 @@ video::-webkit-media-controls-play-button {
 }
 .sheet__close:hover { color: #fff; }
 
+.sheet__body {
+  flex: 1;                 /* fill the fixed-size card */
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
 .sheet__body[hidden] { display: none; }
 
 .sheet__title {
   margin: 6px 0 24px;
   text-align: center;
-  font-size: 40px;
-  font-weight: 400;
-  line-height: 1.05;
+  font-family: "Nimbus Sans", Helvetica, Arial, sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1.02;
   color: #ffffff;
   text-shadow: 0 1px 12px #00000022;
 }
 
 /* ---- About ---- */
 .about-panel {
+  flex: 1;                 /* fill the card height */
+  min-height: 0;
+  overflow: auto;
   background: #ffffffb0;
   border-radius: 22px;
-  padding: 22px 22px 200px;
+  padding: 22px;
   color: var(--ink);
   font-size: 14px;
   line-height: 1.6;
@@ -227,25 +258,31 @@ video::-webkit-media-controls-play-button {
 
 /* ---- Request portfolio form ---- */
 .reqform {
+  flex: 1;                 /* fill the card; submit sits at the bottom */
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 60px;        /* extra space between the title and the first field */
+  padding: 0 18px;         /* inset fields from the card's left/right edges */
 }
 .reqfield {
-  display: block;
+  display: flex;           /* label + input on the same line */
+  align-items: center;
+  gap: 8px;
   background: #ffffffcc;
   border-radius: 16px;
-  padding: 16px 18px;
+  padding: 20px 18px;
 }
-.reqfield--email { background: #ffe7eecc; }
+.reqfield--email { background: #ffffffcc; }
 .reqfield > span {
-  display: block;
+  flex: none;
   font-size: 16px;
   color: var(--ink);
-  margin-bottom: 4px;
+  white-space: nowrap;     /* keep "Name :" on one line */
 }
 .reqfield input {
-  width: 100%;
+  flex: 1;                 /* fill the rest of the row — type next to the label */
+  min-width: 0;
   border: 0;
   background: none;
   font: inherit;
@@ -254,11 +291,11 @@ video::-webkit-media-controls-play-button {
   outline: none;
 }
 .reqsubmit {
-  margin-top: 8px;
+  margin-top: auto;        /* push to the bottom of the filled card */
   padding: 16px;
   border: 0;
   border-radius: 22px;
-  background: #ffd9e2;
+  background: #ffffffcc;
   color: var(--ink);
   font: inherit;
   font-size: 17px;

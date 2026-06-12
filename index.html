@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>yasavdji</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
   <link rel="icon" type="image/png" href="logo.png" />
   <link rel="apple-touch-icon" href="logo.png" />
   <link rel="stylesheet" href="style.css" />
@@ -62,16 +65,17 @@
       <section class="sheet__body" id="modal-portfolio" hidden>
         <h2 class="sheet__title">Request<br />portfolio</h2>
         <form class="reqform" id="reqform" novalidate>
+          <input type="hidden" name="_subject" value="New portfolio request" />
           <label class="reqfield"><span>Name :</span>
             <input type="text" name="name" autocomplete="name" required />
           </label>
           <label class="reqfield"><span>Company :</span>
             <input type="text" name="company" autocomplete="organization" />
           </label>
-          <label class="reqfield reqfield--email"><span>email :</span>
+          <label class="reqfield reqfield--email"><span>Email :</span>
             <input type="email" name="email" autocomplete="email" required />
           </label>
-          <button class="reqsubmit" type="submit">Submit request!</button>
+          <button class="reqsubmit" type="submit">Submit request</button>
           <p class="reqform__status" id="reqStatus" role="status" aria-live="polite"></p>
         </form>
       </section>
