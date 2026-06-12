@@ -270,6 +270,14 @@ video::-webkit-media-controls-play-button {
 }
 /* inline pixel-script accent (1.5× the surrounding text — change to taste) */
 .script { font-family: "pf-pixelscript", sans-serif; font-weight: 400; font-size: 1.5em; }
+/* the big "Yas" flourish in the About bio */
+.about-panel .script {
+  display: inline-block;
+  font-size: 40px;
+  line-height: 0.8;
+  vertical-align: -8px;
+  margin-left: 14px;       /* nudge "Yas" to the right */
+}
 
 /* ---- About ---- */
 .about-panel {
