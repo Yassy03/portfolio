@@ -409,6 +409,7 @@ function openModal(id) {
   frozen = true;                      // freeze the pose so typing can't glitch the video
   hoveringFolder = false;
   sheetBodies.forEach((b) => { b.hidden = b.id !== 'modal-' + id; });
+  sheetEl.classList.toggle('sheet--contact', id === 'contact'); // contact is smaller
   overlay.hidden = false;             // appear instantly at full blur (no fade)
   const focusable = overlay.querySelector('.sheet__body:not([hidden]) input, .sheet__body:not([hidden]) a');
   focusable?.focus({ preventScroll: true });
@@ -424,6 +425,17 @@ function closeModal() {
   mouse.inside = true;
   lastMove = performance.now();
   state = 'tracking';
+
+  // reset the portfolio form + submit button for next time (however it was dismissed)
+  reqform.reset();
+  const sb = reqform.querySelector('.reqsubmit');
+  sb.textContent = 'Submit request';
+  sb.style.background = '';
+  sb.style.color = '';
+  sb.style.fontFamily = '';
+  sb.style.fontSize = '';
+  reqStatus.textContent = '';
+  reqStatus.classList.remove('is-error');
 }
 
 // where a folder sits on screen → the frame whose head points at it
@@ -476,6 +488,16 @@ document.getElementById('sheetClose').addEventListener('click', closeModal);
 overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
 
+// ---- success: just change the button label in place; user clicks off to dismiss ----
+function playSuccess() {
+  const btn = reqform.querySelector('.reqsubmit');
+  btn.textContent = 'Submitted';
+  btn.style.background = '#ff3f77';                       // button turns pink
+  btn.style.color = '#ffffff';                           // white label
+  btn.style.fontFamily = '"pf-pixelscript", sans-serif'; // pixel-script
+  btn.style.fontSize = '30px';                           // bigger
+}
+
 // ---- portfolio form submit ----
 const reqform   = document.getElementById('reqform');
 const reqStatus = document.getElementById('reqStatus');
@@ -496,7 +518,6 @@ reqform.addEventListener('submit', async (e) => {
 
   btn.disabled = true;
   reqStatus.classList.remove('is-error');
-  reqStatus.textContent = 'Sending…';
   try {
     const res = await fetch(FORM_ENDPOINT, {
       method: 'POST',
@@ -504,8 +525,8 @@ reqform.addEventListener('submit', async (e) => {
       body: new FormData(reqform),
     });
     if (!res.ok) throw new Error('bad status');
-    reqform.reset();
-    reqStatus.textContent = 'Thanks — your request is on its way ✓';
+    reqStatus.textContent = '';
+    playSuccess();                    // button label changes; user clicks off to dismiss
   } catch (_) {
     reqStatus.classList.add('is-error');
     reqStatus.textContent = 'Something went wrong. Try again or email directly.';

@@ -155,10 +155,11 @@ video::-webkit-media-controls-play-button {
   pointer-events: none;
 }
 .folder__label {
-  font-family: "Inter", Helvetica, "Helvetica Neue", Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 15px;
   font-weight: 500;
   letter-spacing: 0.01em;
+  color: #000;             /* black, not the grey body text */
 }
 
 /* Phone placement (mockup): About top-left, Request portfolio mid-right,
@@ -178,9 +179,8 @@ video::-webkit-media-controls-play-button {
   place-items: center;
   padding: 16px;
   background: #ffffff14;
-  /* NOTE: no backdrop-filter here — it would cap the card's own blur below.
-     No opacity fade either — fading a backdrop-filter element ramps the blur
-     from 0 to full and shows a "ghost" of the sharp video. Appear instantly. */
+  /* No backdrop-filter here — it would cap the card's own blur below.
+     Opens/closes instantly (no fade, which would ramp the blur and ghost the video). */
 }
 .overlay[hidden] { display: none; }
 
@@ -188,7 +188,7 @@ video::-webkit-media-controls-play-button {
   position: relative;
   /* fits exactly inside the overlay's 16px padding, so it centers precisely */
   width: min(420px, calc(100vw - 32px));
-  /* fixed size so every popup is the same card, regardless of its content */
+  /* fixed size (per modal — Contact overrides it smaller below) */
   height: min(680px, calc(100dvh - 32px));
   display: flex;
   flex-direction: column;
@@ -206,20 +206,34 @@ video::-webkit-media-controls-play-button {
      The overlay's opacity fade carries the open/close instead. */
 }
 
+/* Contact window is a bit smaller than the others */
+.sheet--contact {
+  width: min(384px, calc(100vw - 32px));
+  height: min(600px, calc(100dvh - 32px));
+}
+
 .sheet__close {
   position: absolute;
-  top: 16px;
-  left: 18px;
-  width: 28px;
-  height: 28px;
+  top: 14px;
+  left: 14px;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
   background: none;
   border: 0;
   color: #ffffffcc;
-  font-size: 22px;
-  line-height: 1;
   cursor: pointer;
+}
+.sheet__close svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
 }
 .sheet__close:hover { color: #fff; }
 
@@ -232,7 +246,7 @@ video::-webkit-media-controls-play-button {
 .sheet__body[hidden] { display: none; }
 
 .sheet__title {
-  margin: 6px 0 24px;
+  margin: 4px 0 10px;
   text-align: center;
   font-family: "Nimbus Sans", Helvetica, Arial, sans-serif;
   font-size: 56px;
@@ -241,20 +255,30 @@ video::-webkit-media-controls-play-button {
   color: #ffffff;
   text-shadow: 0 1px 12px #00000022;
 }
+/* just the word "form" in the Adobe pixel-script face */
+.title-script {
+  font-family: "pf-pixelscript", sans-serif;
+  font-weight: 400;
+  font-size: 77px;
+  display: inline-block;
+  margin-top: 8px;        /* a touch of space between "request" and "form" */
+}
+/* inline pixel-script accent (1.5× the surrounding text — change to taste) */
+.script { font-family: "pf-pixelscript", sans-serif; font-weight: 400; font-size: 1.5em; }
 
 /* ---- About ---- */
 .about-panel {
   flex: 1;                 /* fill the card height */
   min-height: 0;
-  overflow: auto;
-  background: #ffffffb0;
-  border-radius: 22px;
-  padding: 22px;
-  color: var(--ink);
-  font-size: 14px;
-  line-height: 1.6;
+  overflow: auto;          /* scroll if the bio is taller than the card */
+  /* sits higher so it fits without scrolling; top still clears the × button */
+  padding: 18px 12px 4px 10px;
+  color: #ffffff;          /* white text directly on the glass (no pill) */
+  font-size: 16px;
+  line-height: 1.65;
 }
-.about-panel p { margin: 0; }
+.about-panel p { margin: 0 0 14px; }
+.about-panel p:last-child { margin-bottom: 0; }
 
 /* ---- Request portfolio form ---- */
 .reqform {
@@ -262,7 +286,7 @@ video::-webkit-media-controls-play-button {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 60px;        /* extra space between the title and the first field */
+  margin-top: 24px;        /* space between the title and the first field */
   padding: 0 18px;         /* inset fields from the card's left/right edges */
 }
 .reqfield {
@@ -287,12 +311,39 @@ video::-webkit-media-controls-play-button {
   background: none;
   font: inherit;
   font-size: 16px;        /* >=16px keeps iOS from zooming on focus */
-  color: var(--ink);
+  color: #ff3f77;          /* the user's typed text is pink */
   outline: none;
+}
+
+/* Message field: label stacked above a multi-line area */
+.reqfield--message {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.reqfield--message > span em {
+  font-style: normal;
+  color: var(--muted);    /* "(optional)" reads lighter */
+}
+.reqfield--message textarea {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  color: #ff3f77;          /* typed text is pink */
+  outline: none;
+  resize: none;
+  min-height: 56px;
+  line-height: 1.4;
 }
 .reqsubmit {
   margin-top: auto;        /* push to the bottom of the filled card */
-  padding: 16px;
+  height: 54px;            /* fixed height so the bigger success text can't grow it */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
   border: 0;
   border-radius: 22px;
   background: #ffffffcc;
@@ -300,9 +351,10 @@ video::-webkit-media-controls-play-button {
   font: inherit;
   font-size: 17px;
   cursor: pointer;
-  transition: filter .12s ease, transform .08s ease;
+  overflow: hidden;
+  transition: filter .12s ease, transform .15s ease;
 }
-.reqsubmit:hover  { filter: brightness(1.04); }
+.reqsubmit:hover  { filter: brightness(1.04); transform: scale(1.03); }
 .reqsubmit:active { transform: scale(0.99); }
 .reqsubmit:disabled { opacity: 0.6; cursor: default; }
 .reqform__status {
@@ -318,11 +370,12 @@ video::-webkit-media-controls-play-button {
 .links {
   display: flex;
   flex-direction: column;
+  align-items: center;     /* don't stretch the pills full width */
   gap: 16px;
-  margin-top: 8px;
+  margin-top: 64px;        /* sit the links lower in the card */
 }
 .pill {
-  display: block;
+  width: min(250px, 100%); /* shorter pills, centered */
   padding: 16px;
   border-radius: 26px;
   background: #ffffffcc;
@@ -330,11 +383,11 @@ video::-webkit-media-controls-play-button {
   text-align: center;
   text-decoration: none;
   font-size: 17px;
-  transition: filter .12s ease, transform .08s ease;
+  transition: filter .12s ease, transform .15s ease;
 }
-.pill:hover  { filter: brightness(1.04); }
+.pill:hover  { filter: brightness(1.04); transform: scale(1.03); }
 .pill:active { transform: scale(0.99); }
-.pill--email { background: #ffe7eecc; }
+.pill--email { background: #ffffffcc; }
 
 /* ==================================================================
    Desktop — same elements, different spacing (only divergence point)
