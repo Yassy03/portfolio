@@ -233,7 +233,13 @@ let hintDismissed = false;
 function dismissHint() {
   if (hintDismissed) return;
   hintDismissed = true;
-  document.getElementById('hint')?.classList.add('is-hidden');
+  const h = document.getElementById('hint');
+  if (!h) return;
+  // freeze the blink at its current opacity, then fade smoothly to 0 (no jump)
+  h.style.opacity = getComputedStyle(h).opacity;
+  h.style.animation = 'none';
+  void h.offsetWidth;            // reflow so the next change transitions
+  h.style.opacity = '0';
 }
 
 function engage(e) {
