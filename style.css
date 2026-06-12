@@ -290,8 +290,8 @@ video::-webkit-media-controls-play-button {
   flex: 1;                 /* fill the card; submit sits at the bottom */
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 24px;        /* space between the title and the first field */
+  gap: 12px;
+  margin-top: 16px;        /* space between the title and the first field */
   padding: 0 18px;         /* inset fields from the card's left/right edges */
 }
 .reqfield {
@@ -300,7 +300,7 @@ video::-webkit-media-controls-play-button {
   gap: 8px;
   background: #ffffffcc;
   border-radius: 16px;
-  padding: 20px 18px;
+  padding: 14px 18px;
 }
 .reqfield--email { background: #ffffffcc; }
 .reqfield > span {
@@ -339,7 +339,7 @@ video::-webkit-media-controls-play-button {
   color: #ff3f77;          /* typed text is pink */
   outline: none;
   resize: none;
-  min-height: 56px;
+  min-height: 40px;
   line-height: 1.4;
 }
 .reqsubmit {
